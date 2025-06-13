@@ -6,10 +6,8 @@ const isEnabledInput = ref(true)
 
 const inputs = useTemplateRef<HTMLInputElement[]>('inputs')
 
-
 const props = defineProps<{
   word: string
-  setFocus?: boolean
 }>()
 
 const emit = defineEmits(['success', 'error'])
@@ -104,17 +102,17 @@ function reset(): void {
   isEnabledInput.value = true;
 }
 
-/// ************ WATCHERS *************** //
-
-watch(() => props.setFocus, (newValue) => {
-  console.log('watcherValue', newValue);
-  if (newValue && inputs && inputs.value) {
-    console.log('Log in the if', inputs.value[0]);
-    setTimeout(() => {
-      inputs.value[0]?.focus()
-    }, 250)
+function focus(): void {
+  if (inputs && inputs.value) {
+    inputs.value[0]?.focus()
   }
+}
+
+defineExpose({
+  focus
 })
+
+/// ************ WATCHERS *************** //
 
 watch(() => props.word, () => {
   reset()

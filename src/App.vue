@@ -1,16 +1,23 @@
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import {nextTick, onMounted, ref, useTemplateRef} from "vue";
 import {solutionWords, allowedGuesses} from './WordList';
 import WordInput from "@/WordInput.vue";
+import {BButton, BModal} from "bootstrap-vue-next";
 
 const currentWord = ref('')
-const wordInputFocus = ref<boolean[]>([false, false, false, false, false, false])
 const isGameOver = ref(false);
+const currentWordDisplay = ref('')
+
+const wordInputRef = useTemplateRef('wordInputRef')
 
 function startNewGame() {
   currentWord.value = solutionWords[Math.floor(Math.random() * solutionWords.length)]
-  wordInputFocus.value = [false, false, false, false, false, false]
   isGameOver.value = false;
+
+  nextTick(() => {
+    // @ts-ignore
+    wordInputRef.value[0].focus()
+  })
 
   console.log(currentWord.value)
 }
@@ -30,10 +37,12 @@ function gameWon() {
 
 function keepTrying(rowIndex: number) {
   if (rowIndex < 6) {
-    wordInputFocus.value[rowIndex + 1] = true
+    // @ts-ignore
+    wordInputRef.value[rowIndex].focus()
     return;
   }
   isGameOver.value = true;
+  currentWordDisplay.value = currentWord.value;
 }
 
 onMounted(() => {
@@ -43,28 +52,37 @@ onMounted(() => {
 </script>
 
 <template>
-
-
   <section class="app-wrapper">
     <div class="game-wrapper">
       <div class="div-wrapper">
         <h2 class="text">Word Guesser</h2>
       </div>
-
       <div class="board">
         <WordInput v-for="i in 6"
                    :key="i"
+                   ref="wordInputRef"
                    :word="currentWord"
-                   :set-focus="wordInputFocus[i]"
                    @success="gameWon"
                    @error="keepTrying(i)"
         />
       </div>
-      <div v-if="isGameOver"
-           class="div-wrapper">
-        You lost!
-      </div>
       <div class="div-wrapper">
+        <BModal v-model="isGameOver"
+                cancel-class="hidden"
+                centered
+                no-header
+                no-footer>
+          <div>
+            <h2 class="lost-game-text">YOU LOST!</h2>
+          </div>
+          <div class="mt-3">
+            <h5 class="lost-game-text">The word was <span class="fw-bold">{{ currentWordDisplay.toUpperCase() }}</span>
+            </h5>
+          </div>
+          <div class="text-center mt-4">
+            <BButton @click="startNewGame" class="bg-success">Start new game</BButton>
+          </div>
+        </BModal>
         <button class="restartBtn" @click="startNewGame">Get a new word</button>
       </div>
     </div>
@@ -81,6 +99,10 @@ onMounted(() => {
   text-align: center;
 }
 
+.lost-game-text {
+  text-align: center;
+}
+
 .app-wrapper {
   background-color: #f0f2f5;
   min-height: 100vh;
@@ -90,6 +112,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 30px;
 }
 
 .board {
@@ -97,9 +120,11 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  margin-top: 30px;
 }
 
 .restartBtn {
+  margin-top: 20px;
   padding: 12px 25px;
   border-radius: 8px;
   font-size: 1.1em;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {ref, useTemplateRef, watch} from "vue";
 import {allowedGuesses} from "@/AllowedGuesses";
-import {BButton, useToastController} from "bootstrap-vue-next";
+import {useToastController} from "bootstrap-vue-next";
 
 interface Tile {
   style?: string | undefined;
@@ -69,13 +69,7 @@ function handleKeydown(index: number, event: KeyboardEvent) {
   }
 }
 
-function handleEnter(event: KeyboardEvent) {
-  const target = event.target as HTMLInputElement;
-
-  if (!target.value) return;
-
-  if (event.key !== 'Enter') return;
-
+function buildTempWord(): string {
   let tempWord = ''
 
   row.value.forEach(tile => {
@@ -83,7 +77,17 @@ function handleEnter(event: KeyboardEvent) {
       tempWord += tile.content;
     }
   })
-  tempWord = tempWord.toLowerCase();
+  return tempWord.toLowerCase();
+}
+
+function handleEnter(event: KeyboardEvent) {
+  const target = event.target as HTMLInputElement;
+
+  if (!target.value) return;
+
+  if (event.key !== 'Enter') return;
+
+  const tempWord = buildTempWord();
 
   if (tempWord.length !== props.word.length) return;
 
@@ -102,9 +106,7 @@ function handleEnter(event: KeyboardEvent) {
   handleWin(tempWord);
 }
 
-function handleWin(tempWord: string) {
-  isEnabledInput.value = false;
-
+function changeTileColours(tempWord: string): void {
   for (let i = 0; i < props.word.length; i++) {
     if (props.word[i] === tempWord[i]) {
       row.value[i].backgroundColor = ' #a0dea0'
@@ -112,6 +114,13 @@ function handleWin(tempWord: string) {
       row.value[i].backgroundColor = ' #ffff80';
     }
   }
+}
+
+function handleWin(tempWord: string) {
+  isEnabledInput.value = false;
+
+  changeTileColours(tempWord);
+
   if (props.word === tempWord) {
     emit('success');
   } else {

@@ -18,16 +18,21 @@ const wordInputRef = useTemplateRef('wordInputRef')
 
 // ***************** FUNCTIONS ******************
 
-function startNewGame(): void {
-  currentWord.value = solutionWords[Math.floor(Math.random() * solutionWords.length)]
-  isGameOver.value = false;
-
+function initialiseDisabledRow(): void {
   isDisabledRow.value = []
 
   for (let i = 0; i < numRows.value; i++) {
     isDisabledRow.value.push(true)
   }
   isDisabledRow.value[0] = false;
+}
+
+
+function startNewGame(): void {
+  currentWord.value = solutionWords[Math.floor(Math.random() * solutionWords.length)]
+  isGameOver.value = false;
+
+  initialiseDisabledRow()
 
   nextTick(() => {
     // @ts-ignore

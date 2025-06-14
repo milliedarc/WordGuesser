@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {nextTick, onMounted, ref, useTemplateRef} from "vue";
 import WordInput from "@/WordInput.vue";
-import {BButton, BModal} from "bootstrap-vue-next";
+import {BButton, BModal, BToastOrchestrator} from "bootstrap-vue-next";
 
 import {solutionWords} from "@/SolutionWords";
 
@@ -72,6 +72,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <BToastOrchestrator/>
   <section v-if="isGameInitialised" class="app-wrapper">
     <div class="game-wrapper">
       <div class="div-wrapper">

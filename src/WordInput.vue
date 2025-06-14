@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import {ref, useTemplateRef, watch} from "vue";
 import {allowedGuesses} from "@/AllowedGuesses";
+import {BButton, useToastController} from "bootstrap-vue-next";
+
+interface Tile {
+  style?: string | undefined;
+  content?: string | undefined;
+  backgroundColor?: string | undefined;
+}
 
 // ***************** REFS ******************
 
@@ -9,18 +16,21 @@ const isEnabledInput = ref(true)
 
 const inputs = useTemplateRef<HTMLInputElement[]>('inputs')
 
+// ***************** CONSTS ******************
+
+const {create} = useToastController()
+
+// ***************** PROPS *****************
+
 const props = defineProps<{
   word: string
   disabled: boolean
 }>()
 
+// ***************** EMITS *****************
+
 const emit = defineEmits(['success', 'error'])
 
-interface Tile {
-  style?: string | undefined;
-  content?: string | undefined;
-  backgroundColor?: string | undefined;
-}
 
 /// ************ FUNCTIONS *************** //
 
@@ -77,7 +87,17 @@ function handleEnter(event: KeyboardEvent) {
 
   if (tempWord.length !== props.word.length) return;
 
-  if (props.word !== tempWord && !allowedGuesses.includes(tempWord.toLowerCase())) return;
+  if (props.word !== tempWord && !allowedGuesses.includes(tempWord.toLowerCase())) {
+    create({
+      body: 'Not in word list!',
+      textVariant: 'danger',
+      noProgress: true,
+      noHoverPause: true,
+      solid: true,
+      modelValue: 3000
+    });
+    return;
+  }
 
   handleWin(tempWord);
 }
@@ -122,6 +142,7 @@ defineExpose({
 watch(() => props.word, () => {
   reset()
 }, {immediate: true})
+
 
 </script>
 

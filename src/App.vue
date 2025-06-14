@@ -1,18 +1,33 @@
 <script setup lang="ts">
 import {nextTick, onMounted, ref, useTemplateRef} from "vue";
-import {solutionWords, allowedGuesses} from './WordList';
 import WordInput from "@/WordInput.vue";
 import {BButton, BModal} from "bootstrap-vue-next";
 
+import {solutionWords} from "@/SolutionWords";
+
+// ***************** REFS ******************
+
+const numRows = ref<number>(6)
 const currentWord = ref('')
-const isGameOver = ref(false);
 const currentWordDisplay = ref('')
+const isGameOver = ref(false);
+const isDisabledRow = ref<boolean[]>([])
+const isGameInitialised = ref(false)
 
 const wordInputRef = useTemplateRef('wordInputRef')
 
-function startNewGame() {
+// ***************** FUNCTIONS ******************
+
+function startNewGame(): void {
   currentWord.value = solutionWords[Math.floor(Math.random() * solutionWords.length)]
   isGameOver.value = false;
+
+  isDisabledRow.value = []
+
+  for (let i = 0; i < numRows.value; i++) {
+    isDisabledRow.value.push(true)
+  }
+  isDisabledRow.value[0] = false;
 
   nextTick(() => {
     // @ts-ignore
@@ -20,10 +35,8 @@ function startNewGame() {
   })
 
   console.log(currentWord.value)
-}
 
-function isValidWord(word: string): boolean {
-  return allowedGuesses.includes(word.toLowerCase()) || solutionWords.includes(word.toLowerCase());
+  isGameInitialised.value = true
 }
 
 function gameWon() {
@@ -36,14 +49,21 @@ function gameWon() {
 }
 
 function keepTrying(rowIndex: number) {
-  if (rowIndex < 6) {
-    // @ts-ignore
-    wordInputRef.value[rowIndex].focus()
+  console.log(rowIndex)
+  if (rowIndex < numRows.value - 1) {
+    isDisabledRow.value[rowIndex + 1] = false;
+
+    nextTick(() => {
+      // @ts-ignore
+      wordInputRef.value[rowIndex + 1].focus()
+    })
     return;
   }
   isGameOver.value = true;
   currentWordDisplay.value = currentWord.value;
 }
+
+// ***************** HOOKS ******************
 
 onMounted(() => {
   startNewGame();
@@ -52,18 +72,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="app-wrapper">
+  <section v-if="isGameInitialised" class="app-wrapper">
     <div class="game-wrapper">
       <div class="div-wrapper">
         <h2 class="text">Word Guesser</h2>
       </div>
       <div class="board">
-        <WordInput v-for="i in 6"
+        <WordInput v-for="i in numRows"
                    :key="i"
                    ref="wordInputRef"
                    :word="currentWord"
                    @success="gameWon"
-                   @error="keepTrying(i)"
+                   @error="keepTrying(i-1)"
+                   :disabled="isDisabledRow[i-1]"
         />
       </div>
       <div class="div-wrapper">

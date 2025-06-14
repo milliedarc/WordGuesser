@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import {ref, useTemplateRef, watch} from "vue";
+import {allowedGuesses} from "@/AllowedGuesses";
+
+// ***************** REFS ******************
 
 const row = ref<Tile[]>([])
 const isEnabledInput = ref(true)
@@ -8,6 +11,7 @@ const inputs = useTemplateRef<HTMLInputElement[]>('inputs')
 
 const props = defineProps<{
   word: string
+  disabled: boolean
 }>()
 
 const emit = defineEmits(['success', 'error'])
@@ -69,8 +73,11 @@ function handleEnter(event: KeyboardEvent) {
       tempWord += tile.content;
     }
   })
+  tempWord = tempWord.toLowerCase();
 
   if (tempWord.length !== props.word.length) return;
+
+  if (props.word !== tempWord && !allowedGuesses.includes(tempWord.toLowerCase())) return;
 
   handleWin(tempWord);
 }
@@ -78,13 +85,11 @@ function handleEnter(event: KeyboardEvent) {
 function handleWin(tempWord: string) {
   isEnabledInput.value = false;
 
-  tempWord = tempWord.toLowerCase();
-
   for (let i = 0; i < props.word.length; i++) {
     if (props.word[i] === tempWord[i]) {
-      row.value[i].backgroundColor = 'green'
+      row.value[i].backgroundColor = ' #a0dea0'
     } else if (props.word.includes(tempWord[i])) {
-      row.value[i].backgroundColor = 'yellow';
+      row.value[i].backgroundColor = ' #ffff80';
     }
   }
   if (props.word === tempWord) {
@@ -134,7 +139,7 @@ watch(() => props.word, () => {
           @input="handleInput(i-1)"
           @keydown="handleKeydown(i-1, $event)"
           @keyup.enter="handleEnter($event)"
-          :disabled="!isEnabledInput"
+          :disabled="!isEnabledInput || props.disabled"
           :style="`background-color: ${row[i-1].backgroundColor}`"
       />
     </div>
@@ -158,6 +163,7 @@ input {
   text-align: center;
   margin-right: 10px;
   margin-bottom: 10px;
+  border: 2px solid black;
 }
 
 </style>

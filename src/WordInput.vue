@@ -12,7 +12,8 @@ interface Tile {
 // ***************** REFS ******************
 
 const row = ref<Tile[]>([])
-const isEnabledInput = ref(true)
+const isEnabledInput = ref<boolean>(true)
+const isSubmitMessageShown = ref<boolean>(false)
 
 const inputs = useTemplateRef<HTMLInputElement[]>('inputs')
 
@@ -34,7 +35,7 @@ const emit = defineEmits(['success', 'error'])
 
 // ************ FUNCTIONS ***************
 
-function goToNextTile(index: number) {
+function goToNextTile(index: number): void {
   const nextIndex = index + 1;
 
   if (!inputs.value || index > props.word.length) return;
@@ -42,9 +43,14 @@ function goToNextTile(index: number) {
   if (nextIndex < inputs.value.length) {
     inputs.value[nextIndex]?.focus()
   }
+  if (nextIndex === inputs.value.length) {
+    isSubmitMessageShown.value = true
+  } else {
+    isSubmitMessageShown.value = false
+  }
 }
 
-function goToPreviousTile(index: number) {
+function goToPreviousTile(index: number): void {
   const prevIndex = index - 1;
 
   if (!inputs.value || index < 0) return;
@@ -54,21 +60,21 @@ function goToPreviousTile(index: number) {
   }
 }
 
-function handleInput(index: number) {
+function handleInput(index: number): void {
   if (row.value[index].content) {
     row.value[index].content = row.value[index].content.toUpperCase();
     goToNextTile(index);
   }
 }
 
-function handleKeydown(index: number, event: KeyboardEvent) {
+function handleKeydown(index: number, event: KeyboardEvent): void {
   const target = event.target as HTMLInputElement;
 
-  if (event.key === 'Backspace' && !target.value || event.key === 'ArrowLeft') {
-    goToPreviousTile(index);
-  }
-  if (event.key === 'ArrowRight') {
-    goToNextTile(index);
+  if (event.key === 'Backspace') {
+    if (!target.value) {
+      goToPreviousTile(index);
+    }
+    isSubmitMessageShown.value = false
   }
 }
 
@@ -83,7 +89,7 @@ function buildTempWord(): string {
   return tempWord.toLowerCase();
 }
 
-function handleEnter(event: KeyboardEvent) {
+function handleEnter(event: KeyboardEvent): void {
   const target = event.target as HTMLInputElement;
 
   if (!target.value) return;
@@ -120,7 +126,7 @@ function changeTileColours(tempWord: string): void {
   }
 }
 
-function handleWin(tempWord: string) {
+function handleWin(tempWord: string): void {
   isEnabledInput.value = false;
 
   changeTileColours(tempWord);
@@ -176,7 +182,13 @@ watch(() => props.word, () => {
           :disabled="!isEnabledInput || props.disabled"
           :style="`background-color: ${row[i-1].backgroundColor}`"
       />
+      <Transition name="fade">
+        <div v-if="isSubmitMessageShown" class="position-absolute" style="right: -170px">
+          Press Enter to submit
+        </div>
+      </Transition>
     </div>
+
   </div>
 
 </template>
@@ -187,7 +199,7 @@ watch(() => props.word, () => {
   display: flex;
   align-items: center;
   flex-direction: row;
-
+  position: relative;
 }
 
 input {
@@ -200,4 +212,13 @@ input {
   border: 2px solid black;
 }
 
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>

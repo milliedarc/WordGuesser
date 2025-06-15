@@ -9,12 +9,12 @@ import LetterMap from "@/LetterMap.vue";
 // ***************** REFS ******************
 
 const numRows = ref<number>(6)
-const currentWord = ref('')
-const currentWordDisplay = ref('')
-const isGameOver = ref(false);
+const currentWord = ref<string>('')
+const currentWordDisplay = ref<string>('')
+const isGameOver = ref<boolean>(false);
 const isDisabledRow = ref<boolean[]>([])
-const isGameInitialised = ref(false)
-const isLetterMapShown = ref(false)
+const isGameInitialised = ref<boolean>(false)
+const isLetterMapShown = ref<boolean>(false)
 
 const wordInputRef = useTemplateRef('wordInputRef')
 
@@ -52,7 +52,7 @@ function startNewGame(): void {
   isGameInitialised.value = true
 }
 
-function gameWon() {
+function gameWon(): void {
   // @ts-ignore
   window.confetti({
     particleCount: 100,
@@ -61,7 +61,7 @@ function gameWon() {
   });
 }
 
-function keepTrying(rowIndex: number) {
+function keepTrying(rowIndex: number): void {
   console.log(rowIndex)
   if (rowIndex < numRows.value - 1) {
     isDisabledRow.value[rowIndex + 1] = false;

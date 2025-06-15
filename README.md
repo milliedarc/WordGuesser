@@ -1,6 +1,6 @@
 # WordGuesser
 
-This template should help get you started developing with Vue 3 in Vite.
+WordGuesser is my own version of Wordle. It lets you play as many times as you want, each time selecting a different random word. You can also choose the difficulty, which will establish how many rows/tiles you will get!
 
 ## Recommended IDE Setup
 

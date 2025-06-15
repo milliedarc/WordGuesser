@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import {nextTick, onMounted, ref, useTemplateRef} from "vue";
+import {computed, nextTick, onMounted, ref, useTemplateRef} from "vue";
 import WordInput from "@/WordInput.vue";
 import {BButton, BModal, BToastOrchestrator} from "bootstrap-vue-next";
 
 import {solutionWords} from "@/SolutionWords";
+import LetterMap from "@/LetterMap.vue";
 
 // ***************** REFS ******************
 
@@ -13,8 +14,15 @@ const currentWordDisplay = ref('')
 const isGameOver = ref(false);
 const isDisabledRow = ref<boolean[]>([])
 const isGameInitialised = ref(false)
+const isLetterMapShown = ref(false)
 
 const wordInputRef = useTemplateRef('wordInputRef')
+
+// ***************** COMPUTED ******************
+
+const buttonMessage = computed(() => {
+  return isLetterMapShown.value ? 'Hide' : 'Show';
+})
 
 // ***************** FUNCTIONS ******************
 
@@ -68,6 +76,10 @@ function keepTrying(rowIndex: number) {
   currentWordDisplay.value = currentWord.value;
 }
 
+function handleLetterMapShown(): void {
+  isLetterMapShown.value = !isLetterMapShown.value;
+}
+
 // ***************** HOOKS ******************
 
 onMounted(() => {
@@ -110,7 +122,11 @@ onMounted(() => {
             <BButton @click="startNewGame" class="bg-success">Start new game</BButton>
           </div>
         </BModal>
-        <button class="restartBtn" @click="startNewGame">Get a new word</button>
+        <div class="btn-wrapper">
+          <button class="btn btn-restart" @click="startNewGame">Get a new word</button>
+          <button class="btn btn-help" @click="handleLetterMapShown">{{ buttonMessage }} letter map</button>
+        </div>
+        <LetterMap v-if="isLetterMapShown"/>
       </div>
     </div>
   </section>
@@ -133,6 +149,7 @@ onMounted(() => {
 .app-wrapper {
   background-color: #f0f2f5;
   min-height: 100vh;
+  overflow: hidden;
 }
 
 .div-wrapper {
@@ -150,27 +167,57 @@ onMounted(() => {
   margin-top: 30px;
 }
 
-.restartBtn {
-  margin-top: 20px;
+.btn-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.btn {
+  margin-top: 10px;
   padding: 12px 25px;
   border-radius: 8px;
   font-size: 1.1em;
   font-weight: bold;
   cursor: pointer;
-  background-color: #4CAF50;
   color: white;
   border: none;
+}
+
+.btn-restart {
+  background-color: #4CAF50;
   transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
 }
 
-.restartBtn:hover {
-  background-color: #45a049;
+.btn-help {
+  background-color: #488c9e;
+  transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+}
+
+.btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
-.restartBtn:active {
+.btn-restart:hover {
+  background-color: #45a049;
+}
+
+.btn-help:hover {
+  background-color: #3f8495;
+}
+
+.btn:active {
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-restart:active {
+  background-color: #50bf56 !important;
+}
+
+.btn-help:active {
+  background-color: #499db1 !important;
 }
 </style>

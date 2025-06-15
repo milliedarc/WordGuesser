@@ -64,8 +64,11 @@ function handleInput(index: number) {
 function handleKeydown(index: number, event: KeyboardEvent) {
   const target = event.target as HTMLInputElement;
 
-  if (event.key === 'Backspace' && !target.value) {
+  if (event.key === 'Backspace' && !target.value || event.key === 'ArrowLeft') {
     goToPreviousTile(index);
+  }
+  if (event.key === 'ArrowRight') {
+    goToNextTile(index);
   }
 }
 
@@ -88,7 +91,7 @@ function handleEnter(event: KeyboardEvent) {
   if (event.key !== 'Enter') return;
 
   const tempWord = buildTempWord();
-  
+
 
   if (tempWord.length !== props.word.length) return;
 

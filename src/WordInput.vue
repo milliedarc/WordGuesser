@@ -32,7 +32,7 @@ const props = defineProps<{
 const emit = defineEmits(['success', 'error'])
 
 
-/// ************ FUNCTIONS *************** //
+// ************ FUNCTIONS ***************
 
 function goToNextTile(index: number) {
   const nextIndex = index + 1;
@@ -88,6 +88,7 @@ function handleEnter(event: KeyboardEvent) {
   if (event.key !== 'Enter') return;
 
   const tempWord = buildTempWord();
+  
 
   if (tempWord.length !== props.word.length) return;
 

@@ -2,12 +2,7 @@
 import {ref, useTemplateRef, watch} from "vue";
 import {allowedGuesses} from "@/AllowedGuesses";
 import {useToastController} from "bootstrap-vue-next";
-
-interface Tile {
-  style?: string | undefined;
-  content?: string | undefined;
-  backgroundColor?: string | undefined;
-}
+import type {Tile} from "@/Tile.ts";
 
 // ***************** REFS ******************
 

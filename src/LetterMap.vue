@@ -7,6 +7,7 @@ const props = defineProps<{
   guessedWordArray: string[];
 }>()
 
+
 </script>
 
 <template>

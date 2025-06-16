@@ -3,6 +3,10 @@ import {ref} from "vue";
 
 const abc = ref<string[]>(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']);
 
+const props = defineProps<{
+  guessedWordArray: string[];
+}>()
+
 </script>
 
 <template>

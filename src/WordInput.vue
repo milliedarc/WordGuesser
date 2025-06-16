@@ -97,7 +97,6 @@ function handleEnter(event: KeyboardEvent): void {
 
   const guessedWord = buildGuessedWord();
 
-
   if (guessedWord.length !== props.word.length) return;
 
   if (props.word !== guessedWord && !allowedGuesses.includes(guessedWord.toLowerCase())) {
@@ -133,7 +132,7 @@ function handleWin(guessedWord: string): void {
   if (props.word === guessedWord) {
     emit('success');
   } else {
-    emit('error');
+    emit('error', guessedWord);
   }
 }
 

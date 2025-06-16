@@ -15,6 +15,7 @@ const isGameOver = ref<boolean>(false);
 const isDisabledRow = ref<boolean[]>([])
 const isGameInitialised = ref<boolean>(false)
 const isLetterMapShown = ref<boolean>(false)
+const guessedWordArray = ref<string[]>([])
 
 const wordInputRef = useTemplateRef('wordInputRef')
 
@@ -39,6 +40,7 @@ function initialiseDisabledRow(): void {
 function startNewGame(): void {
   currentWord.value = solutionWords[Math.floor(Math.random() * solutionWords.length)]
   isGameOver.value = false;
+  guessedWordArray.value = []
 
   initialiseDisabledRow()
 
@@ -61,10 +63,11 @@ function gameWon(): void {
   });
 }
 
-function keepTrying(rowIndex: number): void {
-  console.log(rowIndex)
+function keepTrying(rowIndex: number, guessedWord: string): void {
   if (rowIndex < numRows.value - 1) {
     isDisabledRow.value[rowIndex + 1] = false;
+
+    guessedWordArray.value.push(guessedWord);
 
     nextTick(() => {
       // @ts-ignore
@@ -72,6 +75,7 @@ function keepTrying(rowIndex: number): void {
     })
     return;
   }
+
   isGameOver.value = true;
   currentWordDisplay.value = currentWord.value;
 }
@@ -100,9 +104,9 @@ onMounted(() => {
                    :key="i"
                    ref="wordInputRef"
                    :word="currentWord"
-                   @success="gameWon"
-                   @error="keepTrying(i-1)"
                    :disabled="isDisabledRow[i-1]"
+                   @success="gameWon"
+                   @error="keepTrying(i-1, $event)"
         />
       </div>
       <div class="div-wrapper">
@@ -127,7 +131,9 @@ onMounted(() => {
           <button class="btn btn-help" @click="handleLetterMapShown">{{ buttonMessage }} letter map</button>
         </div>
       </div>
-      <LetterMap v-if="isLetterMapShown" id="letter-map"/>
+      <LetterMap v-if="isLetterMapShown"
+                 :guessed-word-array="guessedWordArray"
+                 id="letter-map"/>
     </div>
   </section>
 </template>

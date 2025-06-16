@@ -5,17 +5,18 @@ import {BButton, BModal, BToastOrchestrator} from "bootstrap-vue-next";
 
 import {solutionWords} from "@/SolutionWords";
 import LetterMap from "@/LetterMap.vue";
+import type {Tile} from "@/Tile.ts";
 
 // ***************** REFS ******************
 
 const numRows = ref<number>(6)
-const currentWord = ref<string>('')
-const currentWordDisplay = ref<string>('')
+const solutionWord = ref<string>('')
+const solutionWordDisplay = ref<string>('')
 const isGameOver = ref<boolean>(false);
 const isDisabledRow = ref<boolean[]>([])
 const isGameInitialised = ref<boolean>(false)
 const isLetterMapShown = ref<boolean>(false)
-const guessedWordArray = ref<string[]>([])
+const guessedTiles = ref<Tile[]>([])
 
 const wordInputRef = useTemplateRef('wordInputRef')
 
@@ -38,9 +39,9 @@ function initialiseDisabledRow(): void {
 
 
 function startNewGame(): void {
-  currentWord.value = solutionWords[Math.floor(Math.random() * solutionWords.length)]
+  solutionWord.value = solutionWords[Math.floor(Math.random() * solutionWords.length)]
   isGameOver.value = false;
-  guessedWordArray.value = []
+  guessedTiles.value = []
 
   initialiseDisabledRow()
 
@@ -49,7 +50,7 @@ function startNewGame(): void {
     wordInputRef.value[0].focus()
   })
 
-  console.log(currentWord.value)
+  console.log(solutionWord.value)
 
   isGameInitialised.value = true
 }
@@ -63,11 +64,11 @@ function gameWon(): void {
   });
 }
 
-function keepTrying(rowIndex: number, guessedWord: string): void {
+function keepTrying(rowIndex: number, tiles: Tile[]): void {
   if (rowIndex < numRows.value - 1) {
     isDisabledRow.value[rowIndex + 1] = false;
 
-    guessedWordArray.value.push(guessedWord);
+    guessedTiles.value.push(...tiles);
 
     nextTick(() => {
       // @ts-ignore
@@ -77,7 +78,7 @@ function keepTrying(rowIndex: number, guessedWord: string): void {
   }
 
   isGameOver.value = true;
-  currentWordDisplay.value = currentWord.value;
+  solutionWordDisplay.value = solutionWord.value;
 }
 
 function handleLetterMapShown(): void {
@@ -103,7 +104,7 @@ onMounted(() => {
         <WordInput v-for="i in numRows"
                    :key="i"
                    ref="wordInputRef"
-                   :word="currentWord"
+                   :solution-word="solutionWord"
                    :disabled="isDisabledRow[i-1]"
                    @success="gameWon"
                    @error="keepTrying(i-1, $event)"
@@ -119,7 +120,7 @@ onMounted(() => {
             <h2 class="lost-game-text">YOU LOST!</h2>
           </div>
           <div class="mt-3">
-            <h5 class="lost-game-text">The word was <span class="fw-bold">{{ currentWordDisplay.toUpperCase() }}</span>
+            <h5 class="lost-game-text">The word was <span class="fw-bold">{{ solutionWordDisplay.toUpperCase() }}</span>
             </h5>
           </div>
           <div class="text-center mt-4">
@@ -132,7 +133,8 @@ onMounted(() => {
         </div>
       </div>
       <LetterMap v-if="isLetterMapShown"
-                 :guessed-word-array="guessedWordArray"
+                 :guessed-tiles="guessedTiles"
+                 :solution-word="solutionWord"
                  id="letter-map"/>
     </div>
   </section>

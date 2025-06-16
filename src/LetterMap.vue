@@ -1,21 +1,53 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {ref, watch} from "vue";
+import type {Tile} from "@/Tile.ts";
 
-const abc = ref<string[]>(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']);
+const abc = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+const tiles = ref<Tile[]>(createTiles())
 
 const props = defineProps<{
-  guessedWordArray: string[];
+  guessedTiles: Tile[];
+  solutionWord: string
 }>()
 
+function createTiles(): Tile[] {
+  const _tiles: Tile[] = []
+  abc.forEach(letter => {
+    _tiles.push({
+      content: letter,
+      backgroundColor: ''
+    })
+  })
+  return _tiles
+}
+
+watch(() => props.guessedTiles, (newVal: Tile[]) => {
+  if (newVal.length === 0) {
+    tiles.value = createTiles()
+    return;
+  }
+
+  for (let i = 0; i < newVal.length; i++) {
+    for (let j = 0; j < tiles.value.length; j++) {
+      if (newVal[i].content?.toLowerCase() === tiles.value[j].content?.toLowerCase()) {
+        tiles.value[j].backgroundColor = newVal[i].backgroundColor;
+        console.log(tiles.value[j].content)
+        break
+      }
+    }
+  }
+}, {immediate: true, deep: true})
 
 </script>
 
 <template>
   <div class="row">
     <div class="tile"
-         v-for="letter in abc"
-         :key="letter">
-      {{ letter }}
+         v-for="tile in tiles"
+         :key="tile.content"
+         :style="`background-color: ${tile.backgroundColor}`">
+
+      {{ tile.content }}
     </div>
   </div>
 </template>

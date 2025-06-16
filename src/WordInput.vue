@@ -19,7 +19,7 @@ const {create} = useToastController()
 // ***************** PROPS *****************
 
 const props = defineProps<{
-  word: string
+  solutionWord: string
   disabled: boolean
 }>()
 
@@ -32,7 +32,7 @@ const emit = defineEmits(['success', 'error'])
 function goToNextTile(index: number): void {
   const nextIndex = index + 1;
 
-  if (!inputs.value || index > props.word.length) return;
+  if (!inputs.value || index > props.solutionWord.length) return;
 
   if (nextIndex < inputs.value.length) {
     inputs.value[nextIndex]?.focus()
@@ -92,9 +92,9 @@ function handleEnter(event: KeyboardEvent): void {
 
   const guessedWord = buildGuessedWord();
 
-  if (guessedWord.length !== props.word.length) return;
+  if (guessedWord.length !== props.solutionWord.length) return;
 
-  if (props.word !== guessedWord && !allowedGuesses.includes(guessedWord.toLowerCase())) {
+  if (props.solutionWord !== guessedWord && !allowedGuesses.includes(guessedWord.toLowerCase())) {
     create({
       body: 'Not in word list!',
       textVariant: 'danger',
@@ -110,11 +110,13 @@ function handleEnter(event: KeyboardEvent): void {
 }
 
 function changeTileColours(guessedWord: string): void {
-  for (let i = 0; i < props.word.length; i++) {
-    if (props.word[i] === guessedWord[i]) {
+  for (let i = 0; i < props.solutionWord.length; i++) {
+    if (props.solutionWord[i] === guessedWord[i]) {
       row.value[i].backgroundColor = ' #a0dea0'
-    } else if (props.word.includes(guessedWord[i])) {
+    } else if (props.solutionWord.includes(guessedWord[i])) {
       row.value[i].backgroundColor = ' #ffff80';
+    } else {
+      row.value[i].backgroundColor = ' #a8a8a8';
     }
   }
 }
@@ -124,16 +126,16 @@ function handleWin(guessedWord: string): void {
 
   changeTileColours(guessedWord);
 
-  if (props.word === guessedWord) {
+  if (props.solutionWord === guessedWord) {
     emit('success');
   } else {
-    emit('error', guessedWord);
+    emit('error', row.value);
   }
 }
 
 function reset(): void {
   row.value = [];
-  for (let i = 0; i < props.word.length; i++) {
+  for (let i = 0; i < props.solutionWord.length; i++) {
     row.value.push({})
   }
   isEnabledInput.value = true;
@@ -151,7 +153,7 @@ defineExpose({
 
 /// ************ WATCHERS *************** //
 
-watch(() => props.word, () => {
+watch(() => props.solutionWord, () => {
   reset()
 }, {immediate: true})
 
@@ -164,7 +166,7 @@ watch(() => props.word, () => {
     <div class="tile">
 
       <input
-          v-for="i in props.word.length"
+          v-for="i in props.solutionWord.length"
           :key="i"
           ref="inputs"
           v-model="row[i-1].content"

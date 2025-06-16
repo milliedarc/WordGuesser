@@ -32,7 +32,6 @@ const props = defineProps<{
 
 const emit = defineEmits(['success', 'error'])
 
-
 // ************ FUNCTIONS ***************
 
 function goToNextTile(index: number): void {
@@ -78,15 +77,15 @@ function handleKeydown(index: number, event: KeyboardEvent): void {
   }
 }
 
-function buildTempWord(): string {
-  let tempWord = ''
+function buildGuessedWord(): string {
+  let guessedWord = ''
 
   row.value.forEach(tile => {
     if (tile.content && tile.content.length > 0) {
-      tempWord += tile.content;
+      guessedWord += tile.content;
     }
   })
-  return tempWord.toLowerCase();
+  return guessedWord.toLowerCase();
 }
 
 function handleEnter(event: KeyboardEvent): void {
@@ -96,12 +95,12 @@ function handleEnter(event: KeyboardEvent): void {
 
   if (event.key !== 'Enter') return;
 
-  const tempWord = buildTempWord();
+  const guessedWord = buildGuessedWord();
 
 
-  if (tempWord.length !== props.word.length) return;
+  if (guessedWord.length !== props.word.length) return;
 
-  if (props.word !== tempWord && !allowedGuesses.includes(tempWord.toLowerCase())) {
+  if (props.word !== guessedWord && !allowedGuesses.includes(guessedWord.toLowerCase())) {
     create({
       body: 'Not in word list!',
       textVariant: 'danger',
@@ -113,25 +112,25 @@ function handleEnter(event: KeyboardEvent): void {
     return;
   }
 
-  handleWin(tempWord);
+  handleWin(guessedWord);
 }
 
-function changeTileColours(tempWord: string): void {
+function changeTileColours(guessedWord: string): void {
   for (let i = 0; i < props.word.length; i++) {
-    if (props.word[i] === tempWord[i]) {
+    if (props.word[i] === guessedWord[i]) {
       row.value[i].backgroundColor = ' #a0dea0'
-    } else if (props.word.includes(tempWord[i])) {
+    } else if (props.word.includes(guessedWord[i])) {
       row.value[i].backgroundColor = ' #ffff80';
     }
   }
 }
 
-function handleWin(tempWord: string): void {
+function handleWin(guessedWord: string): void {
   isEnabledInput.value = false;
 
-  changeTileColours(tempWord);
+  changeTileColours(guessedWord);
 
-  if (props.word === tempWord) {
+  if (props.word === guessedWord) {
     emit('success');
   } else {
     emit('error');

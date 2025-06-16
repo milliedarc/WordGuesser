@@ -126,8 +126,8 @@ onMounted(() => {
           <button class="btn btn-restart" @click="startNewGame">Get a new word</button>
           <button class="btn btn-help" @click="handleLetterMapShown">{{ buttonMessage }} letter map</button>
         </div>
-        <LetterMap v-if="isLetterMapShown"/>
       </div>
+      <LetterMap v-if="isLetterMapShown" id="letter-map"/>
     </div>
   </section>
 </template>
@@ -219,5 +219,12 @@ onMounted(() => {
 
 .btn-help:active {
   background-color: #499db1 !important;
+}
+
+#letter-map {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px
 }
 </style>

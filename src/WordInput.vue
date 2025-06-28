@@ -105,7 +105,7 @@ function handleEnter(event: KeyboardEvent): void {
     });
     return;
   }
-
+  isSubmitMessageShown.value = false;
   handleWin(guessedWord);
 }
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ref, useTemplateRef, watch} from "vue";
-import {allowedGuesses} from "@/AllowedGuesses";
+import {allowedGuesses} from "@/AllowedGuesses.ts";
 import {useToastController} from "bootstrap-vue-next";
 import type {Tile} from "@/Tile.ts";
 

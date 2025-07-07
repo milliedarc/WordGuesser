@@ -1,11 +1,19 @@
 <script setup lang="ts">
 import {computed, nextTick, onMounted, ref, useTemplateRef} from "vue";
-import WordInput from "@/WordInput.vue";
-import {BButton, BModal, BToastOrchestrator} from "bootstrap-vue-next";
+import WordInput from "@/components/WordInput.vue";
+import {
+  BButton,
+  BModal,
+  BToastOrchestrator
+} from "bootstrap-vue-next";
 
 import {solutionWords} from "@/SolutionWords";
-import LetterMap from "@/LetterMap.vue";
+import LetterMap from "@/components/LetterMap.vue";
 import type {Tile} from "@/Tile.ts";
+import Navbar from "@/components/Navbar.vue";
+import {useGlobalState} from "@/state/State.ts";
+
+const globalState = useGlobalState();
 
 // ***************** REFS ******************
 
@@ -15,7 +23,6 @@ const solutionWordDisplay = ref<string>('')
 const isGameOver = ref<boolean>(false);
 const isDisabledRow = ref<boolean[]>([])
 const isGameInitialised = ref<boolean>(false)
-const isLetterMapShown = ref<boolean>(false)
 const guessedTiles = ref<Tile[]>([])
 
 const wordInputRef = useTemplateRef('wordInputRef')
@@ -23,7 +30,7 @@ const wordInputRef = useTemplateRef('wordInputRef')
 // ***************** COMPUTED ******************
 
 const buttonMessage = computed(() => {
-  return isLetterMapShown.value ? 'Hide' : 'Show';
+  return globalState.isLetterMapShown.value ? 'Hide' : 'Show';
 })
 
 // ***************** FUNCTIONS ******************
@@ -82,7 +89,7 @@ function keepTrying(rowIndex: number, tiles: Tile[]): void {
 }
 
 function handleLetterMapShown(): void {
-  isLetterMapShown.value = !isLetterMapShown.value;
+  globalState.isLetterMapShown.value = !globalState.isLetterMapShown.value;
 }
 
 // ***************** HOOKS ******************
@@ -95,60 +102,53 @@ onMounted(() => {
 
 <template>
   <BToastOrchestrator/>
+  <Navbar/>
   <section v-if="isGameInitialised" class="app-wrapper">
     <div class="game-wrapper">
-      <div class="div-wrapper">
-        <h2 class="text">Word Guesser</h2>
-      </div>
-      <div class="board">
-        <WordInput v-for="i in numRows"
-                   :key="i"
-                   ref="wordInputRef"
-                   :solution-word="solutionWord"
-                   :disabled="isDisabledRow[i-1]"
-                   @success="gameWon"
-                   @error="keepTrying(i-1, $event)"
-        />
-      </div>
-      <div class="div-wrapper">
-        <BModal v-model="isGameOver"
-                cancel-class="hidden"
-                centered
-                no-header
-                no-footer>
-          <div>
-            <h2 class="lost-game-text">YOU LOST!</h2>
-          </div>
-          <div class="mt-3">
-            <h5 class="lost-game-text">The word was <span class="fw-bold">{{ solutionWordDisplay.toUpperCase() }}</span>
-            </h5>
-          </div>
-          <div class="text-center mt-4">
-            <BButton @click="startNewGame" class="bg-success">Start new game</BButton>
-          </div>
-        </BModal>
-        <div class="btn-wrapper">
-          <button class="btn btn-restart" @click="startNewGame">Get a new word</button>
-          <button class="btn btn-help" @click="handleLetterMapShown">{{ buttonMessage }} letter map</button>
-        </div>
-      </div>
-      <LetterMap v-if="isLetterMapShown"
-                 :guessed-tiles="guessedTiles"
-                 :solution-word="solutionWord"
-                 id="letter-map"/>
+
+
     </div>
+    <div class="board">
+      <WordInput v-for="i in numRows"
+                 :key="i"
+                 ref="wordInputRef"
+                 :solution-word="solutionWord"
+                 :disabled="isDisabledRow[i-1]"
+                 @success="gameWon"
+                 @error="keepTrying(i-1, $event)"
+      />
+    </div>
+    <div class="div-wrapper">
+      <BModal v-model="isGameOver"
+              cancel-class="hidden"
+              centered
+              no-header
+              no-footer>
+        <div>
+          <h2 class="lost-game-text">YOU LOST!</h2>
+        </div>
+        <div class="mt-3">
+          <h5 class="lost-game-text">The word was <span class="fw-bold">{{ solutionWordDisplay.toUpperCase() }}</span>
+          </h5>
+        </div>
+        <div class="text-center mt-4">
+          <BButton @click="startNewGame" class="bg-success">Start new game</BButton>
+        </div>
+      </BModal>
+      <div class="btn-wrapper">
+        <button class="btn btn-restart" @click="startNewGame">Get a new word</button>
+        <button class="btn btn-help" @click="handleLetterMapShown">{{ buttonMessage }} letter map</button>
+      </div>
+    </div>
+    <LetterMap v-if="globalState.isLetterMapShown.value"
+               :guessed-tiles="guessedTiles"
+               :solution-word="solutionWord"
+               id="letter-map"/>
+
   </section>
 </template>
 
 <style scoped>
-* {
-  font-family: 'Nunito', sans-serif;
-  box-sizing: border-box;
-}
-
-.text {
-  text-align: center;
-}
 
 .lost-game-text {
   text-align: center;
@@ -165,6 +165,7 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   margin-top: 30px;
+  position: relative;
 }
 
 .board {
@@ -187,7 +188,6 @@ onMounted(() => {
   padding: 12px 25px;
   border-radius: 8px;
   font-size: 1.1em;
-  font-weight: bold;
   cursor: pointer;
   color: white;
   border: none;

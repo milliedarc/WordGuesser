@@ -1,28 +1,39 @@
 <script setup lang="ts">
 
 import {BButton, BFormCheckbox, BModal, BTab, BTabs} from "bootstrap-vue-next";
-import {ref} from "vue";
+import {ref, watch} from "vue";
 import {useGlobalState} from "@/state/State.ts";
 
-const model = defineModel<boolean>();
+const showModal = defineModel<boolean>();
 
 const globalState = useGlobalState();
 
 const isLetterMapShown = ref(globalState.isLetterMapShown.value);
+const gameDifficulty = ref(globalState.gameDifficulty.value);
+const difficulties: string[] = ['Default', 'Medium', 'Hard', 'Nightmare']
 
 function saveChanges(): void {
   globalState.isLetterMapShown.value = isLetterMapShown.value;
+  globalState.gameDifficulty.value = gameDifficulty.value;
 }
+
+watch(() => showModal.value, (newVal) => {
+  if (newVal) {
+    isLetterMapShown.value = globalState.isLetterMapShown.value;
+    gameDifficulty.value = globalState.gameDifficulty.value
+  }
+});
 
 </script>
 
 <template>
-  <BModal v-model="model"
+  <BModal v-model="showModal"
           title="Game settings and modes"
           title-class="fs-4"
           @ok="saveChanges"
           ok-title="Save changes"
-          ok-only>
+          ok-only
+          no-close-on-backdrop>
 
     <BTabs content-class="mt-3 fs-6"
            justified
@@ -40,18 +51,11 @@ function saveChanges(): void {
           </div>
 
           <div class="modal-options">
-
-            <div>
-              <BButton variant="outline-secondary">Easy</BButton>
-            </div>
-            <div>
-              <BButton variant="outline-secondary">Medium</BButton>
-            </div>
-            <div>
-              <BButton variant="outline-secondary">Hard</BButton>
-            </div>
-            <div>
-              <BButton variant="outline-secondary">Nightmare</BButton>
+            <div v-for="(difficulty, i) in difficulties" :key="difficulty">
+              <BButton @click="gameDifficulty = i"
+                       :pressed="i === gameDifficulty"
+                       variant="outline-secondary">{{ difficulty }}
+              </BButton>
             </div>
           </div>
         </div>
